@@ -1,0 +1,27 @@
+# Python geçici ve önbellek dosyaları
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Büyük Veri Setleri ve Ağır Modeller (Git'e basılmayacak)
+src/ai_engine/data/
+*.onnx
+*.pt
+*.pth
+*.tar.xz
+*.zip
+
+# C# / Visual Studio derleme kalıntıları
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosv
+*.userprefs
+
+# İşletim sistemi kalıntıları
+.DS_Store
+Thumbs.db
