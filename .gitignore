@@ -1,27 +1,46 @@
-# Python geçici ve önbellek dosyaları
+# ==========================================
+# 1. Python & Sanal Ortam (VirtualEnv)
+# ==========================================
 __pycache__/
 *.py[cod]
+*$py.class
 .venv/
 venv/
 env/
+ENV/
 
-# Büyük Veri Setleri ve Ağır Modeller (Git'e basılmayacak)
-src/ai_engine/data/
-*.onnx
+# ==========================================
+# 2. PyCharm / IDE Ayarları
+# ==========================================
+.idea/
+.vscode/
+
+# ==========================================
+# 3. Ağır Model Ağırlıkları & Veri Setleri
+# (ONNX modeli depoda kalsın diye hariç tutuldu)
+# ==========================================
 *.pt
+*.engine
 *.pth
 *.tar.xz
 *.zip
+src/ai_engine/data/
 
-# C# / Visual Studio derleme kalıntıları
-bin/
-obj/
+# ==========================================
+# 4. C# / Visual Studio Derleme Kalıntıları
+# ==========================================
+**/bin/
+**/obj/
 .vs/
 *.user
 *.suo
 *.userosv
 *.userprefs
+*.csproj.user
 
-# İşletim sistemi kalıntıları
+# ==========================================
+# 5. Log & İşletim Sistemi Dosyaları
+# ==========================================
+*.log
 .DS_Store
 Thumbs.db

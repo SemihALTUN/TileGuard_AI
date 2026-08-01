@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+websockets
+opencv-python
+pillow
+numpy
+onnxruntime
+torch
+torchvision
+ultralytics
+requests
+httpx
+psycopg2-binary
