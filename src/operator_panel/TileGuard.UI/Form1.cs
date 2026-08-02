@@ -1,6 +1,7 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,6 +17,8 @@ namespace TileGuard.UI
         private readonly DatabaseService _databaseService;
         private readonly List<InspectionHistoryModel> _historyList;
         private Image? _currentImage;
+        private ShiftStatsModel _currentShiftStats = new ShiftStatsModel();
+        private readonly DatabaseService _dbService = new DatabaseService();
 
         public Form1()
         {
@@ -24,10 +27,10 @@ namespace TileGuard.UI
             _webSocketService = new WebSocketService();
             _databaseService = new DatabaseService();
             _historyList = new List<InspectionHistoryModel>();
-
             _webSocketService.OnStatusChanged += WebSocketService_OnStatusChanged;
             _webSocketService.OnResultReceived += WebSocketService_OnResultReceived;
-
+            dgvHistory.CellFormatting += dgvHistory_CellFormatting;
+            dgvHistory.DataBindingComplete += dgvHistory_DataBindingComplete;
             StyleDataGridView();
             dgvHistory.CellClick += dgvHistory_CellClick;
 
@@ -36,54 +39,88 @@ namespace TileGuard.UI
         private async void Form1_Load(object? sender, EventArgs e)
         {
             await LoadHistoryFromDatabaseAsync();
+            await LoadShiftStatsFromDatabaseAsync();
         }
         private async Task LoadHistoryFromDatabaseAsync()
         {
             try
             {
                 var history = await _databaseService.GetInspectionHistoryAsync();
+
                 _historyList.Clear();
-                _historyList.AddRange(history);
+
+                if (history != null)
+                {
+                    var top15History = history.Take(15).ToList();
+                    _historyList.AddRange(top15History);
+                }
 
                 dgvHistory.DataSource = null;
                 dgvHistory.DataSource = _historyList;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Veritabaný verileri yüklenirken hata oluþtu: {ex.Message}", "Veritabaný Hatasý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"VeritabanÄ± verileri yÃ¼klenirken hata oluÅŸtu: {ex.Message}", "VeritabanÄ± HatasÄ±", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private async Task LoadShiftStatsFromDatabaseAsync()
+        {
+            try
+            {
+                _currentShiftStats = await _dbService.GetCurrentShiftStatsAsync();
+                UpdateStatisticsUI();
+            }
+            catch (Exception ex)
+            {
             }
         }
         private void StyleDataGridView()
         {
-            dgvHistory.RowHeadersVisible = false; // Sol baþtaki boþ oku/sütunu kaldýrýr
-            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; // Sütunlarý tam sýðdýrýr
-            dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect; // Tüm satýrý seçer
+            dgvHistory.RowHeadersVisible = false; 
+            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; 
+            dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect; 
             dgvHistory.MultiSelect = false;
             dgvHistory.ReadOnly = true;
-
-            dgvHistory.BackgroundColor = Color.FromArgb(30, 30, 30);
-            dgvHistory.DefaultCellStyle.BackColor = Color.FromArgb(45, 45, 48);
-            dgvHistory.DefaultCellStyle.ForeColor = Color.White;
-            dgvHistory.DefaultCellStyle.SelectionBackColor = Color.FromArgb(0, 122, 204);
+            dgvHistory.AllowUserToResizeColumns = false; 
+            dgvHistory.AllowUserToResizeRows = false;  
+            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing; 
+            Color lightGrey = Color.FromArgb(160, 160, 160);
+            Color headerGrey = Color.FromArgb(30, 30, 30); 
+            dgvHistory.BackgroundColor = lightGrey;
+            dgvHistory.DefaultCellStyle.BackColor = lightGrey;
+            dgvHistory.DefaultCellStyle.ForeColor = Color.Black; 
+            dgvHistory.DefaultCellStyle.SelectionBackColor = Color.FromArgb(50, 80, 120);
             dgvHistory.DefaultCellStyle.SelectionForeColor = Color.White;
-
             dgvHistory.EnableHeadersVisualStyles = false;
-            dgvHistory.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(28, 28, 28);
-            dgvHistory.ColumnHeadersDefaultCellStyle.ForeColor = Color.Cyan;
+            dgvHistory.ColumnHeadersDefaultCellStyle.BackColor = headerGrey;
+            dgvHistory.ColumnHeadersDefaultCellStyle.ForeColor = Color.Gainsboro;
             dgvHistory.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            dgvHistory.GridColor = Color.FromArgb(60, 60, 60);
+            dgvHistory.ColumnHeadersDefaultCellStyle.SelectionBackColor = headerGrey;
+            dgvHistory.GridColor = Color.FromArgb(100, 100, 100);
+            dgvHistory.RowTemplate.Height = 26;
         }
         private async void btnConnect_Click(object sender, EventArgs e)
         {
-            if (!_webSocketService.IsConnected)
+            btnConnect.Enabled = false;
+
+            try
             {
-                await _webSocketService.ConnectAsync();
+                if (_webSocketService.IsConnected)
+                {
+                    await _webSocketService.DisconnectAsync();
+                }
+                else
+                {
+                    await _webSocketService.ConnectAsync();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _webSocketService.DisconnectAsync();
-                lblStatus.Text = "Durum: Baðlantý Kapatýldý";
-                lblStatus.ForeColor = Color.Orange;
+                MessageBox.Show($"BaÄŸlantÄ± iÅŸlemi sÄ±rasÄ±nda hata oluÅŸtu: {ex.Message}", "BaÄŸlantÄ± UyarÄ±sÄ±", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            finally
+            {
+                btnConnect.Enabled = true;
             }
         }
 
@@ -91,12 +128,12 @@ namespace TileGuard.UI
         {
             if (!_webSocketService.IsConnected)
             {
-                MessageBox.Show("Lütfen önce Python AI Servisine baðlanýn!", "Uyarý", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("LÃ¼tfen Ã¶nce Python AI Servisine baÄŸlanÄ±n!", "UyarÄ±", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             using OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Görsel Dosyalarý (*.jpg;*.png)|*.jpg;*.png";
+            ofd.Filter = "GÃ¶rsel DosyalarÄ± (*.jpg;*.png)|*.jpg;*.png";
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -115,18 +152,52 @@ namespace TileGuard.UI
                 return;
             }
 
-            lblStatus.Text = $"Durum: {statusMessage}";
-            if (statusMessage.Contains("Baþarýlý"))
+            string msg = statusMessage.ToLower();
+
+            if (msg.Contains("basarili") || msg.Contains("hazir") || msg.Contains("open") || msg.Contains("baÄŸlandÄ±") || msg.Contains("baglandi"))
             {
-                lblStatus.ForeColor = Color.LightGreen;
-                btnConnect.Text = "Baðlantýyý Kes";
+                WebSocketLbl.Text = "ðŸŸ¢ WEBSOCKET : BAÄžLANDI";
+                WebSocketLbl.ForeColor = Color.LightGreen;
+
+                label5.Text = "ðŸŸ¢ SÄ°STEM : CANLI";
+                label5.ForeColor = Color.LightGreen;
+
+                OllamaLbl.Text = "ðŸŸ¢ OLLAMA : HAZIR";
+                OllamaLbl.ForeColor = Color.LightGreen;
+
+                btnConnect.Text = "ðŸ”Œ BAÄžLANTIYI KES";
                 btnConnect.BackColor = Color.Crimson;
+                btnConnect.ForeColor = Color.White;
+            }
+            else if (msg.Contains("baglaniliyor") || msg.Contains("bekleniyor"))
+            {
+                WebSocketLbl.Text = "ðŸŸ¡ WEBSOCKET : BAÄžLANILIYOR...";
+                WebSocketLbl.ForeColor = Color.Yellow;
+
+                label5.Text = "ðŸŸ¡ SÄ°STEM : HAZIRLANIYOR";
+                label5.ForeColor = Color.Yellow;
+
+                OllamaLbl.Text = "ðŸŸ¡ OLLAMA : BEKLENÄ°YOR";
+                OllamaLbl.ForeColor = Color.Yellow;
+
+                btnConnect.Text = "â³ BAÄžLANILIYOR...";
+                btnConnect.BackColor = Color.DarkOrange;
+                btnConnect.ForeColor = Color.White;
             }
             else
             {
-                lblStatus.ForeColor = Color.Yellow;
-                btnConnect.Text = "AI Servisine Baðlan";
+                WebSocketLbl.Text = "ðŸ”´ WEBSOCKET : BAÄžLANTI KOPUK";
+                WebSocketLbl.ForeColor = Color.IndianRed;
+
+                label5.Text = "ðŸŸ¢ SÄ°STEM : Ã‡EVRÄ°MDIÅžI";
+                label5.ForeColor = Color.IndianRed;
+
+                OllamaLbl.Text = "ðŸ”´ OLLAMA : Ã‡EVRÄ°MDIÅžI";
+                OllamaLbl.ForeColor = Color.IndianRed;
+
+                btnConnect.Text = "ðŸ”Œ AI SERVÄ°SÄ°NE BAÄžLAN";
                 btnConnect.BackColor = Color.FromArgb(0, 122, 204);
+                btnConnect.ForeColor = Color.White;
             }
         }
 
@@ -138,7 +209,7 @@ namespace TileGuard.UI
                 return;
             }
 
-            lblInferenceTime.Text = $"Ýþlem Süresi: {result.InferenceTimeMs} ms";
+            lblInferenceTime.Text = $"Ä°ÅŸlem SÃ¼resi: {result.InferenceTimeMs} ms";
             lblDefectCount.Text = $"Tespit Edilen Nesne: {result.TotalDefects}";
 
             StringBuilder visionReportBuilder = new StringBuilder();
@@ -155,9 +226,23 @@ namespace TileGuard.UI
                 }
             }
 
+            txtVisionAnalysis.Text = visionReportBuilder.ToString();
+
+            var defectItems = result.Detections?.Where(d => d.ClassName != "good").ToList() ?? new List<DetectionItemDto>();
+            bool isDefective = defectItems.Count > 0;
+
+            _currentShiftStats.TotalInspected++;
+            if (isDefective)
+                _currentShiftStats.NokCount++;
+            else
+                _currentShiftStats.OkCount++;
+
+            UpdateStatisticsUI();
+
             if (_currentImage != null)
             {
                 Bitmap annotatedBitmap = new Bitmap(_currentImage);
+
                 using (Graphics g = Graphics.FromImage(annotatedBitmap))
                 {
                     foreach (var det in result.Detections)
@@ -186,49 +271,90 @@ namespace TileGuard.UI
                                 g.FillRectangle(bgBrush, x1, y1 - textSize.Height - 4, textSize.Width + 6, textSize.Height + 4);
                                 g.DrawString(labelStr, font, Brushes.White, x1 + 3, y1 - textSize.Height - 2);
                             }
-
-                            var historyModel = new InspectionHistoryModel
-                            {
-                                Timestamp = result.Timestamp,
-                                Status = det.ClassName == "good" ? "SAÐLAM" : "KUSURLU",
-                                DetectedClass = det.ClassName,
-                                Confidence = Math.Round(det.Confidence * 100, 2),
-                                InferenceTimeMs = result.InferenceTimeMs,
-                                VisionAnalysis = det.VisionAnalysis
-                            };
-
-                            try
-                            {
-                                await _databaseService.SaveInspectionHistoryAsync(historyModel);
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show($"Veritabanýna kaydederken hata oluþtu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-
-                            _historyList.Add(historyModel);
                         }
                     }
                 }
 
-                picCamera.Image = annotatedBitmap;
-
-                if (visionReportBuilder.Length > 0)
+                if (defectItems.Count > 0)
                 {
-                    txtVisionAnalysis.Text = visionReportBuilder.ToString();
+                    List<Bitmap> croppedList = new List<Bitmap>();
+
+                    foreach (var defect in defectItems)
+                    {
+                        if (defect.BoundingBox != null && defect.BoundingBox.Count == 4)
+                        {
+                            int cropX = (int)defect.BoundingBox[0];
+                            int cropY = (int)defect.BoundingBox[1];
+                            int cropW = (int)(defect.BoundingBox[2] - cropX);
+                            int cropH = (int)(defect.BoundingBox[3] - cropY);
+
+                            int margin = 15;
+                            cropX = Math.Max(0, cropX - margin);
+                            cropY = Math.Max(0, cropY - margin);
+                            cropW = Math.Min(_currentImage.Width - cropX, cropW + (margin * 2));
+                            cropH = Math.Min(_currentImage.Height - cropY, cropH + (margin * 2));
+
+                            Bitmap? croppedBmp = CropImageRegion(_currentImage, new Rectangle(cropX, cropY, cropW, cropH));
+                            if (croppedBmp != null)
+                            {
+                                croppedList.Add(croppedBmp);
+                            }
+                        }
+                    }
+
+                    Bitmap? combinedImage = CombineCroppedDefects(croppedList);
+
+                    if (combinedImage != null)
+                    {
+                        CroppedPictureBox.Image?.Dispose();
+                        CroppedPictureBox.Image = combinedImage;
+                    }
+
+                    foreach (var item in croppedList)
+                    {
+                        item.Dispose();
+                    }
                 }
                 else
                 {
-                    txtVisionAnalysis.Text = "Yüzey temiz veya VisionLLM analizi üretilemedi.";
+                    CroppedPictureBox.Image?.Dispose();
+                    CroppedPictureBox.Image = null;
                 }
 
-                dgvHistory.DataSource = null;
-                dgvHistory.DataSource = _historyList;
-                if (dgvHistory.Rows.Count > 0)
-                {
-                    dgvHistory.FirstDisplayedScrollingRowIndex = dgvHistory.Rows.Count - 1;
-                }
+                picCamera.Image?.Dispose();
+                picCamera.Image = annotatedBitmap;
             }
+            string mainClass = isDefective ? string.Join(", ", defectItems.Select(d => d.ClassName).Distinct()) : "good";
+            double mainConfidence = result.Detections.FirstOrDefault()?.Confidence ?? 0.0;
+            string mainVisionAnalysis = result.Detections.FirstOrDefault()?.VisionAnalysis ?? string.Empty;
+
+            var historyModel = new InspectionHistoryModel
+            {
+                Timestamp = result.Timestamp,
+                Status = isDefective ? "KUSURLU" : "SAÄžLAM",
+                DetectedClass = mainClass,
+                Confidence = Math.Round(mainConfidence * 100, 2),
+                InferenceTimeMs = result.InferenceTimeMs,
+                VisionAnalysis = mainVisionAnalysis
+            };
+
+            try
+            {
+                await _databaseService.SaveInspectionHistoryAsync(historyModel);
+            }
+            catch
+            {
+            }
+
+            _historyList.Add(historyModel);
+
+            var displayList = _historyList
+                .OrderByDescending(x => x.Id)
+                .Take(15)
+                .ToList();
+
+            dgvHistory.DataSource = null;
+            dgvHistory.DataSource = displayList;
         }
         private void dgvHistory_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
@@ -237,14 +363,156 @@ namespace TileGuard.UI
                 var selectedItem = _historyList[e.RowIndex];
                 if (selectedItem != null && !string.IsNullOrEmpty(selectedItem.VisionAnalysis))
                 {
-                    txtVisionAnalysis.Text = $"Seçilen Tespit Analizi:\n" +
-                                             $"Tür: {selectedItem.DetectedClass.ToUpper()}\n" +
+                    txtVisionAnalysis.Text = $"SeÃ§ilen Tespit Analizi:\n" +
+                                             $"TÃ¼r: {selectedItem.DetectedClass.ToUpper()}\n" +
                                              $"Durum: {selectedItem.Status}\n" +
-                                             $"Doðruluk: %{selectedItem.Confidence}\n" +
+                                             $"DoÄŸruluk: %{selectedItem.Confidence}\n" +
                                              $"{new string('-', 35)}\n" +
                                              $"Rapor: {selectedItem.VisionAnalysis}";
                 }
             }
+        }
+
+        private void UpdateStatisticsUI()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(UpdateStatisticsUI));
+                return;
+            }
+
+            label1.Text = $"TOPLAM Ä°NCELENEN = {_currentShiftStats.TotalInspected:N0}";
+            label2.Text = $"SAÄžLAM (OK) = {_currentShiftStats.OkCount:N0}";
+            label3.Text = $"HATALI (NOK) = {_currentShiftStats.NokCount:N0}";
+            label4.Text = $"HATA ORANI = %{_currentShiftStats.DefectRate:F1}";
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                this.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = FormWindowState.Maximized;
+            }
+        }
+
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+        private Bitmap? CropImageRegion(Image sourceImage, Rectangle cropArea)
+        {
+            try
+            {
+                int x = Math.Max(0, cropArea.X);
+                int y = Math.Max(0, cropArea.Y);
+                int width = Math.Min(sourceImage.Width - x, cropArea.Width);
+                int height = Math.Min(sourceImage.Height - y, cropArea.Height);
+
+                if (width <= 0 || height <= 0) return null;
+
+                Rectangle validCropArea = new Rectangle(x, y, width, height);
+                Bitmap bmpImage = new Bitmap(sourceImage);
+                return bmpImage.Clone(validCropArea, bmpImage.PixelFormat);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        private Bitmap CombineCroppedDefects(List<Bitmap> croppedList)
+        {
+            if (croppedList == null || croppedList.Count == 0) return null;
+            if (croppedList.Count == 1)
+            {
+                return new Bitmap(croppedList[0]);
+            }
+
+            int targetHeight = 250; 
+            int totalWidth = 0;
+
+            List<Bitmap> resizedList = new List<Bitmap>();
+            foreach (var bmp in croppedList)
+            {
+                double scale = (double)targetHeight / bmp.Height;
+                int newWidth = (int)(bmp.Width * scale);
+
+                Bitmap resized = new Bitmap(bmp, newWidth, targetHeight);
+                resizedList.Add(resized);
+
+                totalWidth += newWidth + 6; 
+            }
+            Bitmap combinedBmp = new Bitmap(totalWidth, targetHeight);
+            using (Graphics g = Graphics.FromImage(combinedBmp))
+            {
+                g.Clear(Color.FromArgb(30, 30, 30)); 
+
+                int currentX = 0;
+                for (int i = 0; i < resizedList.Count; i++)
+                {
+                    var resizedBmp = resizedList[i];
+
+                    g.DrawImage(resizedBmp, currentX, 0);
+
+                    if (i < resizedList.Count - 1)
+                    {
+                        using (Pen pen = new Pen(Color.Red, 3))
+                        {
+                            int lineX = currentX + resizedBmp.Width + 3;
+                            g.DrawLine(pen, lineX, 0, lineX, targetHeight);
+                        }
+                    }
+
+                    currentX += resizedBmp.Width + 6;
+                    resizedBmp.Dispose(); 
+                }
+            }
+
+            return combinedBmp;
+        }
+
+        private void veritabanÄ±KaydÄ±ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            HistoryForm historyForm = new HistoryForm();
+            historyForm.StartPosition = FormStartPosition.CenterParent;
+            historyForm.ShowDialog(this);
+        }
+        private void dgvHistory_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            if (dgvHistory.Columns[e.ColumnIndex].Name == "Status" && e.Value != null)
+            {
+                string status = e.Value.ToString() ?? "";
+                if (status.Contains("SAÄžLAM"))
+                {
+                    e.CellStyle.ForeColor = Color.DarkGreen;
+                    e.CellStyle.Font = new Font(dgvHistory.Font, FontStyle.Bold);
+                }
+                else if (status.Contains("KUSURLU"))
+                {
+                    e.CellStyle.ForeColor = Color.DarkRed;
+                    e.CellStyle.Font = new Font(dgvHistory.Font, FontStyle.Bold);
+                }
+            }
+
+            if (dgvHistory.Columns[e.ColumnIndex].Name == "Confidence" && e.Value != null)
+            {
+                e.CellStyle.ForeColor = Color.DarkBlue;
+                e.CellStyle.Font = new Font(dgvHistory.Font, FontStyle.Bold);
+            }
+        }
+        private void dgvHistory_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            dgvHistory.ClearSelection();
         }
     }
 }

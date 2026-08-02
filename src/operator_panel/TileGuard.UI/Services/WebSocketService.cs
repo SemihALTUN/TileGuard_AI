@@ -23,18 +23,44 @@ namespace TileGuard.UI.Services
 
         public async Task ConnectAsync()
         {
+            if (IsConnected) return;
+
             try
             {
                 _webSocket = new ClientWebSocket();
-                OnStatusChanged?.Invoke("Python AI Servisine baglaniliyor...");
+                OnStatusChanged?.Invoke("baglaniliyor");
                 await _webSocket.ConnectAsync(_serverUri, CancellationToken.None);
-                OnStatusChanged?.Invoke("Baglanti Basarili! Servis Hazir.");
 
+                OnStatusChanged?.Invoke("baglandi");
                 _ = ReceiveLoopAsync();
             }
             catch (Exception ex)
             {
                 OnStatusChanged?.Invoke($"Baglanti Hatasi: {ex.Message}");
+            }
+        }
+
+        public async Task DisconnectAsync()
+        {
+            try
+            {
+                if (_webSocket != null)
+                {
+                    if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.Connecting)
+                    {
+                        await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Kullanici kapatti", CancellationToken.None);
+                    }
+                    _webSocket.Dispose();
+                    _webSocket = null;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                _webSocket = null;
+                OnStatusChanged?.Invoke("kapatildi");
             }
         }
 
@@ -95,15 +121,6 @@ namespace TileGuard.UI.Services
                     OnStatusChanged?.Invoke($"Okuma Hatasi: {ex.Message}");
                     break;
                 }
-            }
-        }
-
-        public async Task DisconnectAsync()
-        {
-            if (IsConnected)
-            {
-                await _webSocket!.CloseAsync(WebSocketCloseStatus.NormalClosure, "Kullanici kapatti", CancellationToken.None);
-                _webSocket.Dispose();
             }
         }
     }
