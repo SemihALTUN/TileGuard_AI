@@ -1,17 +1,41 @@
+using System;
+using System.Windows.Forms;
+
 namespace TileGuard.UI
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+
+            while (true)
+            {
+                using (LoginForm loginForm = new LoginForm())
+                {
+                    if (loginForm.ShowDialog() == DialogResult.OK)
+                    {
+                        using (Form1 mainForm = new Form1(loginForm.CurrentUser!, loginForm.CurrentShift!))
+                        {
+                            DialogResult result = mainForm.ShowDialog();
+
+                            if (result == DialogResult.Retry)
+                            {
+                                continue; 
+                            }
+                            else
+                            {
+                                break; 
+                            }
+                        }
+                    }
+                    else
+                    {
+                        break; 
+                    }
+                }
+            }
         }
     }
 }

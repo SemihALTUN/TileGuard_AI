@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using TileGuard.UI.DTOs; // DTO katmanımız
+using TileGuard.UI.DTOs;
 
 namespace TileGuard.UI.Services
 {
@@ -15,6 +15,7 @@ namespace TileGuard.UI.Services
     {
         private ClientWebSocket? _webSocket;
         private readonly Uri _serverUri = new Uri("ws://127.0.0.1:8000/ws/inspect");
+        private readonly LoggingService _logger = new LoggingService();
 
         public event Action<InspectionResultDto>? OnResultReceived;
         public event Action<string>? OnStatusChanged;
@@ -36,6 +37,7 @@ namespace TileGuard.UI.Services
             }
             catch (Exception ex)
             {
+                await _logger.LogExceptionAsync("ERROR", $"WebSocket Bağlantı Hatası: {ex.Message}", ex.StackTrace);
                 OnStatusChanged?.Invoke($"Baglanti Hatasi: {ex.Message}");
             }
         }
@@ -54,8 +56,9 @@ namespace TileGuard.UI.Services
                     _webSocket = null;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await _logger.LogExceptionAsync("WARNING", $"WebSocket Kapatma Uyarısı: {ex.Message}", ex.StackTrace);
             }
             finally
             {
@@ -84,6 +87,7 @@ namespace TileGuard.UI.Services
             }
             catch (Exception ex)
             {
+                await _logger.LogExceptionAsync("ERROR", $"WebSocket Görsel Gönderim Hatası: {ex.Message}", ex.StackTrace);
                 OnStatusChanged?.Invoke($"Gonderim Hatasi: {ex.Message}");
             }
         }
@@ -118,6 +122,7 @@ namespace TileGuard.UI.Services
                 }
                 catch (Exception ex)
                 {
+                    await _logger.LogExceptionAsync("ERROR", $"WebSocket Okuma/Dinleme Döngüsü Hatası: {ex.Message}", ex.StackTrace);
                     OnStatusChanged?.Invoke($"Okuma Hatasi: {ex.Message}");
                     break;
                 }

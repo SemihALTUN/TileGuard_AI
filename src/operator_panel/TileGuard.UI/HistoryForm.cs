@@ -17,6 +17,7 @@ namespace TileGuard.UI
         private Point _dragCursorPoint;
         private Point _dragFormPoint;
         private readonly DatabaseService _databaseService;
+        private readonly LoggingService _logger = new LoggingService();
 
         public HistoryForm()
         {
@@ -49,6 +50,7 @@ namespace TileGuard.UI
             }
             catch (Exception ex)
             {
+                await _logger.LogExceptionAsync("ERROR", $"Geçmiş verileri yüklenirken hata: {ex.Message}", ex.StackTrace);
                 MessageBox.Show($"Tüm geçmiş yüklenirken hata oluştu: {ex.Message}", "Veritabanı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

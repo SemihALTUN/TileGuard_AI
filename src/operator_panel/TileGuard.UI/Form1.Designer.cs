@@ -35,7 +35,7 @@
             tableLayoutPanel3 = new TableLayoutPanel();
             pictureBox1 = new PictureBox();
             panel11 = new Panel();
-            label6 = new Label();
+            lblAktifOperator = new Label();
             panel10 = new Panel();
             label5 = new Label();
             panelRight = new Panel();
@@ -54,6 +54,7 @@
             toolStripMenuItem1 = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripMenuItem();
+            çıkışYapToolStripMenuItem = new ToolStripMenuItem();
             panel1 = new Panel();
             tableLayoutPanel1 = new TableLayoutPanel();
             panel5 = new Panel();
@@ -210,7 +211,7 @@
             // 
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Image = Properties.Resources.Logo1;
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
             pictureBox1.Location = new Point(3, 3);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(786, 54);
@@ -221,7 +222,7 @@
             // panel11
             // 
             panel11.BackColor = Color.Gray;
-            panel11.Controls.Add(label6);
+            panel11.Controls.Add(lblAktifOperator);
             panel11.Dock = DockStyle.Fill;
             panel11.Location = new Point(1389, 3);
             panel11.Name = "panel11";
@@ -229,18 +230,18 @@
             panel11.Size = new Size(588, 54);
             panel11.TabIndex = 4;
             // 
-            // label6
+            // lblAktifOperator
             // 
-            label6.AutoSize = true;
-            label6.Dock = DockStyle.Fill;
-            label6.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 162);
-            label6.ForeColor = Color.White;
-            label6.Location = new Point(5, 5);
-            label6.Margin = new Padding(0);
-            label6.Name = "label6";
-            label6.Size = new Size(293, 30);
-            label6.TabIndex = 0;
-            label6.Text = "AKTİF OPERATÖR : Semih A.";
+            lblAktifOperator.AutoSize = true;
+            lblAktifOperator.Dock = DockStyle.Fill;
+            lblAktifOperator.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 162);
+            lblAktifOperator.ForeColor = Color.White;
+            lblAktifOperator.Location = new Point(5, 5);
+            lblAktifOperator.Margin = new Padding(0);
+            lblAktifOperator.Name = "lblAktifOperator";
+            lblAktifOperator.Size = new Size(293, 30);
+            lblAktifOperator.TabIndex = 0;
+            lblAktifOperator.Text = "AKTİF OPERATÖR : Semih A.";
             // 
             // panel10
             // 
@@ -343,7 +344,7 @@
             // menuStrip1
             // 
             menuStrip1.BackColor = SystemColors.ButtonFace;
-            menuStrip1.Items.AddRange(new ToolStripItem[] { anaSayfaToolStripMenuItem, loglarToolStripMenuItem, ayarlarToolStripMenuItem, toolStripMenuItem1, toolStripMenuItem2, toolStripMenuItem3 });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { anaSayfaToolStripMenuItem, loglarToolStripMenuItem, ayarlarToolStripMenuItem, toolStripMenuItem1, toolStripMenuItem2, toolStripMenuItem3, çıkışYapToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1980, 24);
@@ -366,15 +367,16 @@
             // veritabanıKaydıToolStripMenuItem
             // 
             veritabanıKaydıToolStripMenuItem.Name = "veritabanıKaydıToolStripMenuItem";
-            veritabanıKaydıToolStripMenuItem.Size = new Size(158, 22);
+            veritabanıKaydıToolStripMenuItem.Size = new Size(180, 22);
             veritabanıKaydıToolStripMenuItem.Text = "Veritabanı Kaydı";
             veritabanıKaydıToolStripMenuItem.Click += veritabanıKaydıToolStripMenuItem_Click;
             // 
             // hataListesiToolStripMenuItem
             // 
             hataListesiToolStripMenuItem.Name = "hataListesiToolStripMenuItem";
-            hataListesiToolStripMenuItem.Size = new Size(158, 22);
+            hataListesiToolStripMenuItem.Size = new Size(180, 22);
             hataListesiToolStripMenuItem.Text = "Hata Listesi";
+            hataListesiToolStripMenuItem.Click += hataListesiToolStripMenuItem_Click;
             // 
             // ayarlarToolStripMenuItem
             // 
@@ -412,6 +414,16 @@
             toolStripMenuItem3.Size = new Size(31, 20);
             toolStripMenuItem3.Text = "—";
             toolStripMenuItem3.Click += toolStripMenuItem3_Click;
+            // 
+            // çıkışYapToolStripMenuItem
+            // 
+            çıkışYapToolStripMenuItem.Alignment = ToolStripItemAlignment.Right;
+            çıkışYapToolStripMenuItem.BackColor = Color.FromArgb(192, 0, 0);
+            çıkışYapToolStripMenuItem.ForeColor = Color.White;
+            çıkışYapToolStripMenuItem.Name = "çıkışYapToolStripMenuItem";
+            çıkışYapToolStripMenuItem.Size = new Size(66, 20);
+            çıkışYapToolStripMenuItem.Text = "Çıkış Yap";
+            çıkışYapToolStripMenuItem.Click += çıkışYapToolStripMenuItem_Click;
             // 
             // panel1
             // 
@@ -772,7 +784,7 @@
         private Button button2;
         private TableLayoutPanel tableLayoutPanel3;
         private Panel panel11;
-        private Label label6;
+        private Label lblAktifOperator;
         private Panel panel10;
         private Label label5;
         private ToolStripMenuItem toolStripMenuItem1;
@@ -785,5 +797,6 @@
         private GroupBox groupBox3;
         private GroupBox groupBox4;
         private Panel panel12;
+        private ToolStripMenuItem çıkışYapToolStripMenuItem;
     }
 }

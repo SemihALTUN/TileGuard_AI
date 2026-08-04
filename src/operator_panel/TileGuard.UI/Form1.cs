@@ -19,6 +19,8 @@ namespace TileGuard.UI
         private Image? _currentImage;
         private ShiftStatsModel _currentShiftStats = new ShiftStatsModel();
         private readonly DatabaseService _dbService = new DatabaseService();
+        private readonly UserModel _currentUser;
+        private readonly ShiftModel _currentShift;
 
         public Form1()
         {
@@ -35,6 +37,16 @@ namespace TileGuard.UI
             dgvHistory.CellClick += dgvHistory_CellClick;
 
             this.Load += Form1_Load;
+        }
+        public Form1(UserModel user, ShiftModel shift) : this()
+        {
+            _currentUser = user;
+            _currentShift = shift;
+
+            if (lblAktifOperator != null)
+            {
+                lblAktifOperator.Text = $"AKTİF OPERATÖR : {_currentUser.FullName}";
+            }
         }
         private async void Form1_Load(object? sender, EventArgs e)
         {
@@ -76,19 +88,19 @@ namespace TileGuard.UI
         }
         private void StyleDataGridView()
         {
-            dgvHistory.RowHeadersVisible = false; 
-            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; 
-            dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect; 
+            dgvHistory.RowHeadersVisible = false;
+            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvHistory.MultiSelect = false;
             dgvHistory.ReadOnly = true;
-            dgvHistory.AllowUserToResizeColumns = false; 
-            dgvHistory.AllowUserToResizeRows = false;  
-            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing; 
+            dgvHistory.AllowUserToResizeColumns = false;
+            dgvHistory.AllowUserToResizeRows = false;
+            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             Color lightGrey = Color.FromArgb(160, 160, 160);
-            Color headerGrey = Color.FromArgb(30, 30, 30); 
+            Color headerGrey = Color.FromArgb(30, 30, 30);
             dgvHistory.BackgroundColor = lightGrey;
             dgvHistory.DefaultCellStyle.BackColor = lightGrey;
-            dgvHistory.DefaultCellStyle.ForeColor = Color.Black; 
+            dgvHistory.DefaultCellStyle.ForeColor = Color.Black;
             dgvHistory.DefaultCellStyle.SelectionBackColor = Color.FromArgb(50, 80, 120);
             dgvHistory.DefaultCellStyle.SelectionForeColor = Color.White;
             dgvHistory.EnableHeadersVisualStyles = false;
@@ -436,7 +448,7 @@ namespace TileGuard.UI
                 return new Bitmap(croppedList[0]);
             }
 
-            int targetHeight = 250; 
+            int targetHeight = 250;
             int totalWidth = 0;
 
             List<Bitmap> resizedList = new List<Bitmap>();
@@ -448,12 +460,12 @@ namespace TileGuard.UI
                 Bitmap resized = new Bitmap(bmp, newWidth, targetHeight);
                 resizedList.Add(resized);
 
-                totalWidth += newWidth + 6; 
+                totalWidth += newWidth + 6;
             }
             Bitmap combinedBmp = new Bitmap(totalWidth, targetHeight);
             using (Graphics g = Graphics.FromImage(combinedBmp))
             {
-                g.Clear(Color.FromArgb(30, 30, 30)); 
+                g.Clear(Color.FromArgb(30, 30, 30));
 
                 int currentX = 0;
                 for (int i = 0; i < resizedList.Count; i++)
@@ -472,7 +484,7 @@ namespace TileGuard.UI
                     }
 
                     currentX += resizedBmp.Width + 6;
-                    resizedBmp.Dispose(); 
+                    resizedBmp.Dispose();
                 }
             }
 
@@ -513,6 +525,24 @@ namespace TileGuard.UI
         private void dgvHistory_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
         {
             dgvHistory.ClearSelection();
+        }
+
+        private void çıkışYapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Oturumu kapatıp giriş ekranına dönmek istediğinize emin misiniz?", "Oturumu Kapat", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (dialogResult == DialogResult.Yes)
+            {
+                this.DialogResult = DialogResult.Retry;
+                this.Close();
+            }
+        }
+
+        private void hataListesiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SystemLogsForm systemlogsForm = new SystemLogsForm();
+            systemlogsForm.StartPosition = FormStartPosition.CenterParent;
+            systemlogsForm.ShowDialog(this);
         }
     }
 }
