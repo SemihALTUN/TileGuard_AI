@@ -219,6 +219,32 @@ namespace TileGuard.UI.Services
             }
             return list;
         }
+        public async Task<bool> CreateUserAsync(string username, string passwordHash, string fullName, string role)
+        {
+            try
+            {
+                const string sql = @"
+            INSERT INTO users (username, password_hash, full_name, role, is_active) 
+            VALUES (@username, @passwordHash, @fullName, @role, true);";
+
+                using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@username", username.Trim());
+                cmd.Parameters.AddWithValue("@passwordHash", passwordHash.Trim());
+                cmd.Parameters.AddWithValue("@fullName", fullName.Trim());
+                cmd.Parameters.AddWithValue("@role", role.Trim());
+
+                await cmd.ExecuteNonQueryAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogExceptionAsync("ERROR", $"CreateUserAsync Hatası: {ex.Message}", ex.StackTrace);
+                return false;
+            }
+        }
 
     }
 }

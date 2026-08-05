@@ -178,10 +178,9 @@
             // 
             txtPassword.Font = new Font("Segoe UI", 18F);
             txtPassword.Location = new Point(256, 142);
-            txtPassword.Multiline = true;
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
-            txtPassword.Size = new Size(298, 37);
+            txtPassword.Size = new Size(298, 39);
             txtPassword.TabIndex = 5;
             txtPassword.UseSystemPasswordChar = true;
             // 

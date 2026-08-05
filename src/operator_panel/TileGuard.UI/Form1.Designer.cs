@@ -298,9 +298,9 @@
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox2.Controls.Add(CroppedPictureBox);
             groupBox2.ForeColor = SystemColors.ButtonFace;
-            groupBox2.Location = new Point(515, 408);
+            groupBox2.Location = new Point(515, 405);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(535, 439);
+            groupBox2.Size = new Size(535, 442);
             groupBox2.TabIndex = 4;
             groupBox2.TabStop = false;
             groupBox2.Text = "KIRPILAN KARE";
@@ -311,7 +311,7 @@
             CroppedPictureBox.BackColor = SystemColors.ControlDark;
             CroppedPictureBox.Location = new Point(6, 19);
             CroppedPictureBox.Name = "CroppedPictureBox";
-            CroppedPictureBox.Size = new Size(523, 414);
+            CroppedPictureBox.Size = new Size(523, 417);
             CroppedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             CroppedPictureBox.TabIndex = 0;
             CroppedPictureBox.TabStop = false;
@@ -354,8 +354,8 @@
             // anaSayfaToolStripMenuItem
             // 
             anaSayfaToolStripMenuItem.Name = "anaSayfaToolStripMenuItem";
-            anaSayfaToolStripMenuItem.Size = new Size(68, 20);
-            anaSayfaToolStripMenuItem.Text = "AnaSayfa";
+            anaSayfaToolStripMenuItem.Size = new Size(71, 20);
+            anaSayfaToolStripMenuItem.Text = "Ana Sayfa";
             // 
             // loglarToolStripMenuItem
             // 
@@ -367,14 +367,14 @@
             // veritabanıKaydıToolStripMenuItem
             // 
             veritabanıKaydıToolStripMenuItem.Name = "veritabanıKaydıToolStripMenuItem";
-            veritabanıKaydıToolStripMenuItem.Size = new Size(180, 22);
+            veritabanıKaydıToolStripMenuItem.Size = new Size(158, 22);
             veritabanıKaydıToolStripMenuItem.Text = "Veritabanı Kaydı";
             veritabanıKaydıToolStripMenuItem.Click += veritabanıKaydıToolStripMenuItem_Click;
             // 
             // hataListesiToolStripMenuItem
             // 
             hataListesiToolStripMenuItem.Name = "hataListesiToolStripMenuItem";
-            hataListesiToolStripMenuItem.Size = new Size(180, 22);
+            hataListesiToolStripMenuItem.Size = new Size(158, 22);
             hataListesiToolStripMenuItem.Text = "Hata Listesi";
             hataListesiToolStripMenuItem.Click += hataListesiToolStripMenuItem_Click;
             // 
@@ -390,6 +390,7 @@
             kullanıcıEklemeToolStripMenuItem.Name = "kullanıcıEklemeToolStripMenuItem";
             kullanıcıEklemeToolStripMenuItem.Size = new Size(160, 22);
             kullanıcıEklemeToolStripMenuItem.Text = "Kullanıcı Ekleme";
+            kullanıcıEklemeToolStripMenuItem.Click += kullanıcıEklemeToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
