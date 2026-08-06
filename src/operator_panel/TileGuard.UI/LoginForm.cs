@@ -1,36 +1,20 @@
-﻿using System;
-using System.Drawing;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using TileGuard.UI.Helpers;
 using TileGuard.UI.Models;
 using TileGuard.UI.Services;
 
 namespace TileGuard.UI
 {
-    public partial class LoginForm : Form
+    public partial class LoginForm : BaseForm
     {
         private readonly DatabaseService _databaseService;
         private readonly LoggingService _logger = new LoggingService();
-        private bool _dragging;
-        private Point _dragCursorPoint;
-        private Point _dragFormPoint;
         public UserModel? CurrentUser { get; private set; }
         public ShiftModel? CurrentShift { get; private set; }
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams handleParam = base.CreateParams;
-                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
-                return handleParam;
-            }
-        }
         public LoginForm()
         {
             InitializeComponent();
             _databaseService = new DatabaseService();
-
-            SetupDragging();
+            RegisterDragging(menuStrip1);
             this.AcceptButton = btnLogin;
 
             this.Shown += LoginForm_Shown;
@@ -73,34 +57,6 @@ namespace TileGuard.UI
         {
             Application.Exit();
         }
-
-        private void SetupDragging()
-        {
-            this.MouseDown += Form_MouseDown;
-            this.MouseMove += Form_MouseMove;
-            this.MouseUp += Form_MouseUp;
-        }
-
-        private void Form_MouseDown(object? sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                _dragging = true;
-                _dragCursorPoint = Cursor.Position;
-                _dragFormPoint = this.Location;
-            }
-        }
-
-        private void Form_MouseMove(object? sender, MouseEventArgs e)
-        {
-            if (_dragging)
-            {
-                Point dif = Point.Subtract(Cursor.Position, new Size(_dragCursorPoint));
-                this.Location = Point.Add(_dragFormPoint, new Size(dif));
-            }
-        }
-
-        private void Form_MouseUp(object? sender, MouseEventArgs e) => _dragging = false;
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {

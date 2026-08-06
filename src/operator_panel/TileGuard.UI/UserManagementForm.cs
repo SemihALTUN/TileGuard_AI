@@ -1,36 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using TileGuard.UI.Helpers;
 using TileGuard.UI.Models;
 using TileGuard.UI.Services;
 
 namespace TileGuard.UI
 {
-    public partial class UserManagementForm : Form
+    public partial class UserManagementForm : BaseForm
     {
         private readonly DatabaseService _databaseService;
         private readonly LoggingService _logger;
         private List<UserModel> _userList;
         private int _selectedUserId = -1;
-
-        private bool _dragging = false;
-        private Point _dragCursorPoint;
-        private Point _dragFormPoint;
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams handleParam = base.CreateParams;
-                handleParam.ExStyle |= 0x02000000;
-                return handleParam;
-            }
-        }
         public UserManagementForm()
         {
             InitializeComponent();
@@ -40,16 +19,10 @@ namespace TileGuard.UI
 
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterParent;
-
+            RegisterDragging(menuStrip1);
+            UIHelper.StyleDataGridView(dgvUsers);
             this.Shown += UserManagementForm_Shown;
             dgvUsers.CellClick += dgvUsers_CellClick;
-
-            if (menuStrip1 != null)
-            {
-                menuStrip1.MouseDown += MenuStrip_MouseDown;
-                menuStrip1.MouseMove += MenuStrip_MouseMove;
-                menuStrip1.MouseUp += MenuStrip_MouseUp;
-            }
         }
 
         private async void UserManagementForm_Shown(object? sender, EventArgs e)
@@ -68,8 +41,6 @@ namespace TileGuard.UI
                 txtUsername.BackColor = Color.FromArgb(50, 50, 50);
                 txtUsername.ForeColor = Color.White;
             }
-
-            StyleDataGridView();
             await LoadUsersAsync();
         }
 
@@ -88,33 +59,6 @@ namespace TileGuard.UI
             {
                 MessageBox.Show($"Kullanıcılar yüklenirken hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void StyleDataGridView()
-        {
-            dgvUsers.RowHeadersVisible = false;
-            dgvUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvUsers.MultiSelect = false;
-            dgvUsers.ReadOnly = true;
-            dgvUsers.AllowUserToResizeColumns = false;
-            dgvUsers.AllowUserToResizeRows = false;
-            dgvUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-
-            Color lightGrey = Color.FromArgb(160, 160, 160);
-            Color headerGrey = Color.FromArgb(30, 30, 30);
-            dgvUsers.BackgroundColor = lightGrey;
-            dgvUsers.DefaultCellStyle.BackColor = lightGrey;
-            dgvUsers.DefaultCellStyle.ForeColor = Color.Black;
-            dgvUsers.DefaultCellStyle.SelectionBackColor = Color.FromArgb(50, 80, 120);
-            dgvUsers.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvUsers.EnableHeadersVisualStyles = false;
-            dgvUsers.ColumnHeadersDefaultCellStyle.BackColor = headerGrey;
-            dgvUsers.ColumnHeadersDefaultCellStyle.ForeColor = Color.Gainsboro;
-            dgvUsers.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            dgvUsers.ColumnHeadersDefaultCellStyle.SelectionBackColor = headerGrey;
-            dgvUsers.GridColor = Color.FromArgb(100, 100, 100);
-            dgvUsers.RowTemplate.Height = 26;
         }
 
         private void dgvUsers_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -201,27 +145,6 @@ namespace TileGuard.UI
         private void closeToolStripMenuItem_Click(object sender, EventArgs e) => this.Close();
 
         private void minimizeToolStripMenuItem_Click(object sender, EventArgs e) => this.WindowState = FormWindowState.Minimized;
-
-        private void MenuStrip_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                _dragging = true;
-                _dragCursorPoint = Cursor.Position;
-                _dragFormPoint = this.Location;
-            }
-        }
-
-        private void MenuStrip_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_dragging)
-            {
-                Point dif = Point.Subtract(Cursor.Position, new Size(_dragCursorPoint));
-                this.Location = Point.Add(_dragFormPoint, new Size(dif));
-            }
-        }
-
-        private void MenuStrip_MouseUp(object sender, MouseEventArgs e) => _dragging = false;
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {

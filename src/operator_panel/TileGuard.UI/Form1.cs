@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Text;
 using TileGuard.UI.DTOs;
+using TileGuard.UI.Helpers;
 using TileGuard.UI.Models;
 using TileGuard.UI.Services;
 
 namespace TileGuard.UI
 {
-    public partial class Form1 : Form
+    public partial class Form1 : BaseForm
     {
         private readonly WebSocketService _webSocketService;
         private readonly DatabaseService _databaseService;
@@ -21,19 +16,10 @@ namespace TileGuard.UI
         private readonly DatabaseService _dbService = new DatabaseService();
         private readonly UserModel _currentUser;
         private readonly ShiftModel _currentShift;
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams handleParam = base.CreateParams;
-                handleParam.ExStyle |= 0x02000000;
-                return handleParam;
-            }
-        }
         public Form1()
         {
             InitializeComponent();
-
+            RegisterDragging(menuStrip1);
             _webSocketService = new WebSocketService();
             _databaseService = new DatabaseService();
             _historyList = new List<InspectionHistoryModel>();
@@ -41,7 +27,7 @@ namespace TileGuard.UI
             _webSocketService.OnResultReceived += WebSocketService_OnResultReceived;
             dgvHistory.CellFormatting += dgvHistory_CellFormatting;
             dgvHistory.DataBindingComplete += dgvHistory_DataBindingComplete;
-            StyleDataGridView();
+            UIHelper.StyleDataGridView(dgvHistory);
             dgvHistory.CellClick += dgvHistory_CellClick;
 
             this.Shown += Form1_Shown;
@@ -93,31 +79,6 @@ namespace TileGuard.UI
             catch (Exception ex)
             {
             }
-        }
-        private void StyleDataGridView()
-        {
-            dgvHistory.RowHeadersVisible = false;
-            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvHistory.MultiSelect = false;
-            dgvHistory.ReadOnly = true;
-            dgvHistory.AllowUserToResizeColumns = false;
-            dgvHistory.AllowUserToResizeRows = false;
-            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            Color lightGrey = Color.FromArgb(160, 160, 160);
-            Color headerGrey = Color.FromArgb(30, 30, 30);
-            dgvHistory.BackgroundColor = lightGrey;
-            dgvHistory.DefaultCellStyle.BackColor = lightGrey;
-            dgvHistory.DefaultCellStyle.ForeColor = Color.Black;
-            dgvHistory.DefaultCellStyle.SelectionBackColor = Color.FromArgb(50, 80, 120);
-            dgvHistory.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgvHistory.EnableHeadersVisualStyles = false;
-            dgvHistory.ColumnHeadersDefaultCellStyle.BackColor = headerGrey;
-            dgvHistory.ColumnHeadersDefaultCellStyle.ForeColor = Color.Gainsboro;
-            dgvHistory.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
-            dgvHistory.ColumnHeadersDefaultCellStyle.SelectionBackColor = headerGrey;
-            dgvHistory.GridColor = Color.FromArgb(100, 100, 100);
-            dgvHistory.RowTemplate.Height = 26;
         }
         private async void btnConnect_Click(object sender, EventArgs e)
         {
