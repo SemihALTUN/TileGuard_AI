@@ -557,5 +557,18 @@ namespace TileGuard.UI
             addUserForm.StartPosition = FormStartPosition.CenterParent;
             addUserForm.ShowDialog(this);
         }
+
+        private void kullanıcıBilgileriGüncellemeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_currentUser == null || _currentUser.Role?.Trim().ToLower() != "admin")
+            {
+                MessageBox.Show("Bu alanı yalnızca sistem yöneticileri (Admin) kullanabilir!", "Yetkisiz Erişim", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            UserManagementForm managementForm = new UserManagementForm();
+            managementForm.StartPosition = FormStartPosition.CenterParent;
+            managementForm.ShowDialog(this);
+        }
     }
 }

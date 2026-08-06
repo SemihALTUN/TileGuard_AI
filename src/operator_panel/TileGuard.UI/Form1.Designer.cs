@@ -51,6 +51,7 @@
             hataListesiToolStripMenuItem = new ToolStripMenuItem();
             ayarlarToolStripMenuItem = new ToolStripMenuItem();
             kullanıcıEklemeToolStripMenuItem = new ToolStripMenuItem();
+            kullanıcıBilgileriGüncellemeToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripMenuItem();
@@ -380,7 +381,7 @@
             // 
             // ayarlarToolStripMenuItem
             // 
-            ayarlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { kullanıcıEklemeToolStripMenuItem });
+            ayarlarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { kullanıcıEklemeToolStripMenuItem, kullanıcıBilgileriGüncellemeToolStripMenuItem });
             ayarlarToolStripMenuItem.Name = "ayarlarToolStripMenuItem";
             ayarlarToolStripMenuItem.Size = new Size(56, 20);
             ayarlarToolStripMenuItem.Text = "Ayarlar";
@@ -388,9 +389,16 @@
             // kullanıcıEklemeToolStripMenuItem
             // 
             kullanıcıEklemeToolStripMenuItem.Name = "kullanıcıEklemeToolStripMenuItem";
-            kullanıcıEklemeToolStripMenuItem.Size = new Size(160, 22);
+            kullanıcıEklemeToolStripMenuItem.Size = new Size(227, 22);
             kullanıcıEklemeToolStripMenuItem.Text = "Kullanıcı Ekleme";
             kullanıcıEklemeToolStripMenuItem.Click += kullanıcıEklemeToolStripMenuItem_Click;
+            // 
+            // kullanıcıBilgileriGüncellemeToolStripMenuItem
+            // 
+            kullanıcıBilgileriGüncellemeToolStripMenuItem.Name = "kullanıcıBilgileriGüncellemeToolStripMenuItem";
+            kullanıcıBilgileriGüncellemeToolStripMenuItem.Size = new Size(227, 22);
+            kullanıcıBilgileriGüncellemeToolStripMenuItem.Text = "Kullanıcı Bilgileri Güncelleme";
+            kullanıcıBilgileriGüncellemeToolStripMenuItem.Click += kullanıcıBilgileriGüncellemeToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -799,5 +807,6 @@
         private GroupBox groupBox4;
         private Panel panel12;
         private ToolStripMenuItem çıkışYapToolStripMenuItem;
+        private ToolStripMenuItem kullanıcıBilgileriGüncellemeToolStripMenuItem;
     }
 }

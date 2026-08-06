@@ -245,6 +245,93 @@ namespace TileGuard.UI.Services
                 return false;
             }
         }
+        public async Task<List<UserModel>> GetAllUsersAsync()
+        {
+            var list = new List<UserModel>();
+            try
+            {
+                const string sql = @"
+            SELECT user_id, username, password_hash, full_name, role, is_active 
+            FROM users 
+            ORDER BY user_id;";
+
+                using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                while (await reader.ReadAsync())
+                {
+                    list.Add(new UserModel
+                    {
+                        UserId = reader.GetInt32(0),
+                        Username = reader.GetString(1),
+                        FullName = reader.GetString(3),
+                        Role = reader.GetString(4),
+                        IsActive = reader.GetBoolean(5)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogExceptionAsync("ERROR", $"GetAllUsersAsync Hatası: {ex.Message}", ex.StackTrace);
+            }
+            return list;
+        }
+
+        public async Task<bool> UpdateUserAsync(int userId, string fullName, string role, bool isActive)
+        {
+            try
+            {
+                const string sql = @"
+            UPDATE users 
+            SET full_name = @fullName, role = @role, is_active = @isActive 
+            WHERE user_id = @userId;";
+
+                using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@fullName", fullName.Trim());
+                cmd.Parameters.AddWithValue("@role", role.Trim());
+                cmd.Parameters.AddWithValue("@isActive", isActive);
+                cmd.Parameters.AddWithValue("@userId", userId);
+
+                await cmd.ExecuteNonQueryAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogExceptionAsync("ERROR", $"UpdateUserAsync Hatası: {ex.Message}", ex.StackTrace);
+                return false;
+            }
+        }
+        public async Task<bool> UpdatePasswordAsync(int userId, string newPassword)
+        {
+            try
+            {
+                const string sql = @"
+            UPDATE users 
+            SET password_hash = @password 
+            WHERE user_id = @userId;";
+
+                using var conn = new NpgsqlConnection(_connectionString);
+                await conn.OpenAsync();
+
+                using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@password", newPassword.Trim());
+                cmd.Parameters.AddWithValue("@userId", userId);
+
+                await cmd.ExecuteNonQueryAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogExceptionAsync("ERROR", $"UpdatePasswordAsync Hatası: {ex.Message}", ex.StackTrace);
+                return false;
+            }
+        }
 
     }
 }
