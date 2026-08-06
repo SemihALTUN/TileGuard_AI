@@ -21,7 +21,15 @@ namespace TileGuard.UI
         private readonly DatabaseService _dbService = new DatabaseService();
         private readonly UserModel _currentUser;
         private readonly ShiftModel _currentShift;
-
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000;
+                return handleParam;
+            }
+        }
         public Form1()
         {
             InitializeComponent();
@@ -36,7 +44,7 @@ namespace TileGuard.UI
             StyleDataGridView();
             dgvHistory.CellClick += dgvHistory_CellClick;
 
-            this.Load += Form1_Load;
+            this.Shown += Form1_Shown;
         }
         public Form1(UserModel user, ShiftModel shift) : this()
         {
@@ -48,7 +56,7 @@ namespace TileGuard.UI
                 lblAktifOperator.Text = $"AKTİF OPERATÖR : {_currentUser.FullName}";
             }
         }
-        private async void Form1_Load(object? sender, EventArgs e)
+        private async void Form1_Shown(object? sender, EventArgs e)
         {
             await LoadHistoryFromDatabaseAsync();
             await LoadShiftStatsFromDatabaseAsync();

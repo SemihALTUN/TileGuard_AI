@@ -248,7 +248,7 @@
             Name = "LoginForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "LoginForm";
-            Load += LoginForm_Load;
+            Load += LoginForm_Shown;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             pnlCard.ResumeLayout(false);

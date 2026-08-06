@@ -22,7 +22,15 @@ namespace TileGuard.UI
         private bool _dragging = false;
         private Point _dragCursorPoint;
         private Point _dragFormPoint;
-
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000;
+                return handleParam;
+            }
+        }
         public UserManagementForm()
         {
             InitializeComponent();
@@ -33,7 +41,7 @@ namespace TileGuard.UI
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterParent;
 
-            this.Load += UserManagementForm_Load;
+            this.Shown += UserManagementForm_Shown;
             dgvUsers.CellClick += dgvUsers_CellClick;
 
             if (menuStrip1 != null)
@@ -44,7 +52,7 @@ namespace TileGuard.UI
             }
         }
 
-        private async void UserManagementForm_Load(object? sender, EventArgs e)
+        private async void UserManagementForm_Shown(object? sender, EventArgs e)
         {
             if (cmbRole != null)
             {

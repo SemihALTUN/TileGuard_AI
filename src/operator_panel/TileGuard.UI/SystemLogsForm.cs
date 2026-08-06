@@ -13,6 +13,15 @@ namespace TileGuard.UI
         private Point _dragFormPoint;
         private readonly LoggingService _loggingService;
 
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return handleParam;
+            }
+        }
         public SystemLogsForm()
         {
             InitializeComponent();
@@ -30,10 +39,10 @@ namespace TileGuard.UI
             dgvSystemLogs.CellFormatting += dgvSystemLogs_CellFormatting;
             dgvSystemLogs.DataBindingComplete += dgvSystemLogs_DataBindingComplete;
 
-            this.Load += SystemLogsForm_Load;
+            this.Shown += SystemLogsForm_Shown;
         }
 
-        private async void SystemLogsForm_Load(object? sender, EventArgs e)
+        private async void SystemLogsForm_Shown(object? sender, EventArgs e)
         {
             await LoadLogsToGridAsync();
         }

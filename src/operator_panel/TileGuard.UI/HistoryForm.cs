@@ -18,7 +18,15 @@ namespace TileGuard.UI
         private Point _dragFormPoint;
         private readonly DatabaseService _databaseService;
         private readonly LoggingService _logger = new LoggingService();
-
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000;
+                return handleParam;
+            }
+        }
         public HistoryForm()
         {
             InitializeComponent();
@@ -31,10 +39,10 @@ namespace TileGuard.UI
             StyleDataGridView();
             dgvAllHistory.CellFormatting += dgvAllHistory_CellFormatting;
             dgvAllHistory.DataBindingComplete += dgvAllHistory_DataBindingComplete;
-            this.Load += HistoryForm_Load;
+            this.Shown += HistoryForm_Shown;
         }
 
-        private async void HistoryForm_Load(object? sender, EventArgs e)
+        private async void HistoryForm_Shown(object? sender, EventArgs e)
         {
             await LoadAllHistoryAsync();
         }

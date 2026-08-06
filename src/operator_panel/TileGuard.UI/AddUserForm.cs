@@ -18,7 +18,15 @@ namespace TileGuard.UI
         private Point _dragFormPoint;
         private readonly DatabaseService _databaseService;
         private readonly LoggingService _logger = new LoggingService();
-
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000;
+                return handleParam;
+            }
+        }
         public AddUserForm()
         {
             InitializeComponent();
@@ -31,10 +39,10 @@ namespace TileGuard.UI
                 menuStrip1.MouseUp += MenuStrip_MouseUp;
             }
 
-            this.Load += AddUserForm_Load;
+            this.Shown += AddUserForm_Shown;
         }
 
-        private void AddUserForm_Load(object? sender, EventArgs e)
+        private void AddUserForm_Shown(object? sender, EventArgs e)
         {
             if (cmbRole != null)
             {

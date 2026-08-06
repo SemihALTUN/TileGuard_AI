@@ -16,6 +16,15 @@ namespace TileGuard.UI
         private Point _dragFormPoint;
         public UserModel? CurrentUser { get; private set; }
         public ShiftModel? CurrentShift { get; private set; }
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleParam = base.CreateParams;
+                handleParam.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return handleParam;
+            }
+        }
         public LoginForm()
         {
             InitializeComponent();
@@ -23,8 +32,10 @@ namespace TileGuard.UI
 
             SetupDragging();
             this.AcceptButton = btnLogin;
+
+            this.Shown += LoginForm_Shown;
         }
-        private async void LoginForm_Load(object sender, EventArgs e)
+        private async void LoginForm_Shown(object sender, EventArgs e)
         {
             await LoadShiftsFromDatabaseAsync();
         }
