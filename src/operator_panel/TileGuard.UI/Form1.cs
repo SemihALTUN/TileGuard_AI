@@ -165,6 +165,21 @@ namespace TileGuard.UI
                 btnConnect.BackColor = Color.DarkOrange;
                 btnConnect.ForeColor = Color.White;
             }
+            else if (msg.Contains("kapatildi") || msg.Contains("koptu") || msg.Contains("disconnect") || msg.Contains("kapat"))
+            {
+                WebSocketLbl.Text = "🔴 WEBSOCKET : BAĞLANTI KOPUK";
+                WebSocketLbl.ForeColor = Color.IndianRed;
+
+                label5.Text = "🔴 SİSTEM : ÇEVRİMDIŞI";
+                label5.ForeColor = Color.IndianRed;
+
+                OllamaLbl.Text = "🔴 OLLAMA : ÇEVRİMDIŞI";
+                OllamaLbl.ForeColor = Color.IndianRed;
+
+                btnConnect.Text = "🔌 AI SERVİSİNE BAĞLAN";
+                btnConnect.BackColor = Color.FromArgb(0, 122, 204);
+                btnConnect.ForeColor = Color.White;
+            }
             else
             {
                 WebSocketLbl.Text = "🔴 WEBSOCKET : BAĞLANTI KOPUK";
@@ -322,6 +337,7 @@ namespace TileGuard.UI
             try
             {
                 await _databaseService.SaveInspectionHistoryAsync(historyModel);
+                await LoadHistoryFromDatabaseAsync();
             }
             catch
             {

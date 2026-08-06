@@ -3,32 +3,33 @@ from io import BytesIO
 from PIL import Image
 import httpx
 
+
 class VisionLLMAgent:
-    def __init__(self, model_name: str = "moondream"):
+    def __init__(self, model_name: str = "llava"):
         self.model_name = model_name
         self.ollama_url = "http://localhost:11434/api/generate"
 
     def analyze_crop(self, image_crop: Image.Image) -> dict:
-        """
-        Kırpılmış kusurlu fayans bölgesini inceler ve Türkçe teknik rapor üretir.
-        """
         try:
             buffered = BytesIO()
             image_crop.save(buffered, format="JPEG")
             img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
             prompt = (
-                "You are an industrial quality control specialist inspecting ceramic/porcelain tiles. "
-                "Describe the defect or anomaly in this image (e.g. oil stain, crack, scratch, glue strip). "
-                "ALWAYS answer ONLY in Turkish language using 1-2 short technical sentences. "
-                "Example: 'Fayans yüzeyinde yağ lekesi tespit edildi, temizlenmesi gerekiyor.'"
+                "Analyze this image of a ceramic tile defect. "
+                "Output ONLY plain ASCII English text. "
+                "Describe the defect in 3 words max. No special characters, no unicode."
             )
 
             payload = {
                 "model": self.model_name,
                 "prompt": prompt,
                 "images": [img_str],
-                "stream": False
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "num_predict": 50
+                }
             }
 
             with httpx.Client(timeout=30.0) as client:
@@ -36,16 +37,17 @@ class VisionLLMAgent:
                 if response.status_code == 200:
                     res_text = response.json().get("response", "").strip()
 
-                    is_defect = "STATUS: DEFECT" in res_text.upper() or "DEFECT" in res_text.upper()
+                    if not res_text or len(res_text) < 3:
+                        res_text = "Fayans yüzeyinde kusur tespit edildi."
 
                     return {
                         "llm_response": res_text,
-                        "is_defect": is_defect,
+                        "is_defect": True,
                         "status": "success"
                     }
                 else:
                     return {
-                        "llm_response": "VisionLLM yanıt vermedi.",
+                        "llm_response": "VisionLLM yanıt veremedi.",
                         "is_defect": False,
                         "status": "error"
                     }

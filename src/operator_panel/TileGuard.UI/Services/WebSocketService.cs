@@ -46,6 +46,7 @@ namespace TileGuard.UI.Services
         {
             try
             {
+                OnStatusChanged?.Invoke("kapatildi");
                 if (_webSocket != null)
                 {
                     if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.Connecting)
@@ -58,7 +59,8 @@ namespace TileGuard.UI.Services
             }
             catch (Exception ex)
             {
-                await _logger.LogExceptionAsync("WARNING", $"WebSocket Kapatma Uyarısı: {ex.Message}", ex.StackTrace);
+                await _logger.LogExceptionAsync("ERROR", $"WebSocket Okuma/Dinleme Döngüsü Hatası: {ex.Message}", ex.StackTrace);
+                OnStatusChanged?.Invoke("kapatildi"); 
             }
             finally
             {
@@ -107,8 +109,12 @@ namespace TileGuard.UI.Services
 
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Kapatildi", CancellationToken.None);
-                        OnStatusChanged?.Invoke("Baglanti Kapatildi.");
+                        if (_webSocket != null && _webSocket.State == WebSocketState.Open)
+                        {
+                            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Kapatildi", CancellationToken.None);
+                        }
+
+                        OnStatusChanged?.Invoke("kapatildi");
                         break;
                     }
 
@@ -123,7 +129,7 @@ namespace TileGuard.UI.Services
                 catch (Exception ex)
                 {
                     await _logger.LogExceptionAsync("ERROR", $"WebSocket Okuma/Dinleme Döngüsü Hatası: {ex.Message}", ex.StackTrace);
-                    OnStatusChanged?.Invoke($"Okuma Hatasi: {ex.Message}");
+                    OnStatusChanged?.Invoke("kapatildi");
                     break;
                 }
             }
