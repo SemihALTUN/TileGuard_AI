@@ -1,49 +1,53 @@
 # TileGuard AI - Endüstriyel Fayans Kalite Kontrol Sistemi
 
-TileGuard AI, endüstriyel fayans üretim hatlarında yüzey kusurlarını (çatlak, leke, kırık, kenar hasarı vb.) gerçek zamanlı olarak tespit eden ve yapay zekâ destekli hibrit mimarisiyle detaylı analiz sunan uçtan uca bir kalite kontrol sistemidir.
+TileGuard AI, endüstriyel fayans üretim hatlarında yüzey kusurlarını gerçek zamanlı olarak tespit eden ve yapay zekâ destekli hibrit mimarisiyle detaylı analiz sunan uçtan uca bir kalite kontrol sistemidir.
 
-Sistem; **YOLOv11 (ONNX Runtime)** ile yüksek hızlı nesne tespiti, **Moondream Vision-Language Model (VLM)** ile kusurların doğal dilde analiz edilmesi, **FastAPI WebSocket** tabanlı asenkron haberleşme ve **C# WinForms** tabanlı operatör panelini tek bir mimaride bir araya getirir.
+Sistem; **YOLOv11 (ONNX Runtime)** ile yüksek hızlı nesne tespiti, **Llava Vision-Language Model (VLM)** ile kusurların akıllı analiz edilmesi, **FastAPI WebSocket** tabanlı asenkron haberleşme ve modern **C# WinForms** tabanlı operatör panelini tek bir mimaride bir araya getirir.
 
 ---
 
-## Proje Durumu
+# Proje Durumu
 
-> **Mevcut Durum:** MVP / Erken Geliştirme Aşaması
+**Mevcut Aşama:** Aktif Geliştirme / Beta Aşaması (MVP Tamamlandı)
 
-TileGuard AI şu anda erken geliştirme aşamasındadır. Temel sistem mimarisi, yapay zekâ çıkarım boru hattı ve ana bileşenler çalışır durumdadır. Bununla birlikte kullanıcı arayüzü, performans optimizasyonları ve çeşitli sistem iyileştirmeleri üzerinde geliştirme çalışmaları devam etmektedir.
+Temel sistem mimarisi, yapay zekâ çıkarım boru hattı, ilişkisel veritabanı yapısı, yetkilendirme modülleri ve C# operatör paneli stabil bir şekilde çalışmaktadır. Sistem üzerindeki optimizasyonlar, model yanıt iyileştirmeleri ve arayüz geliştirmeleri aktif olarak devam etmektedir.
 
-Bu depo, projenin geliştirme sürecini belgelemek ve ilerleyen sürümlerde yapılacak iyileştirmeleri takip edebilmek amacıyla aktif olarak güncellenmektedir. Yeni özellikler, hata düzeltmeleri ve mimari iyileştirmeler düzenli olarak eklenecektir.
 ---
 
-#  Özellikler
+# Ekran Görüntüleri
+
+![TileGuard AI Arayüz Önizlemesi](docs/images/preview.png)
+
+---
+
+# Özellikler
 
 - Gerçek zamanlı fayans yüzey kusuru tespiti
-- Hibrit Yapay Zekâ Boru Hattı (YOLOv11 + Vision-Language Model)
+- Hibrit Yapay Zekâ Boru Hattı (YOLOv11 + Llava VLM)
 - ONNX Runtime ile yüksek performanslı çıkarım
-- FastAPI WebSocket tabanlı asenkron iletişim
-- Bounding Box ile otomatik kusur konumlandırma
-- Moondream modeli ile doğal dilde kusur analizi
-- PostgreSQL üzerinde denetim geçmişi kaydı
+- FastAPI WebSocket tabanlı asenkron iletişim ve anlık veri akışı
+- Bounding Box ile otomatik kusur konumlandırma ve kırpma (ROI)
+- Llava modeli ile akıllı kusur analizi ve raporlama
+- PostgreSQL üzerinde ilişkisel denetim geçmişi, kullanıcı/vardiya takibi ve sistem loglama altyapısı
+- Rol tabanlı kullanıcı yönetimi (Admin / Operatör)
 - Modern C# WinForms operatör paneli
-- Ölçeklenebilir backend mimarisi
 
 ---
 
-#  Kullanılan Teknolojiler
+# Kullanılan Teknolojiler
 
 | Kategori | Teknolojiler |
 |----------|--------------|
-| Yapay Zekâ | YOLOv11, ONNX Runtime, Moondream VLM |
-| Backend | Python, FastAPI, WebSocket |
-| Görüntü İşleme | OpenCV |
-| Veritabanı | PostgreSQL |
-| Masaüstü Arayüz | C# WinForms (.NET) |
-| AI Runtime | Ollama |
-| Dağıtım (Planlanan) | Docker, Docker Compose |
+| **Yapay Zekâ** | YOLOv11, ONNX Runtime, Llava VLM (Ollama) |
+| **Backend** | Python, FastAPI, WebSocket, Uvicorn |
+| **Görüntü İşleme** | OpenCV, Pillow |
+| **Veritabanı** | PostgreSQL, Npgsql |
+| **Masaüstü Arayüz** | C# WinForms (.NET), Modern UI Bileşenleri |
+| **Dağıtım (Planlanan)** | Docker, Docker Compose |
 
 ---
 
-#  Sistem Mimarisi
+# Sistem Mimarisi
 
 ```text
           Görüntü Kaynağı
@@ -64,74 +68,66 @@ Bu depo, projenin geliştirme sürecini belgelemek ve ilerleyen sürümlerde yap
    ROI (Kusurlu Bölge) Kırpma
                  │
                  ▼
-Moondream Vision-Language Model
+     Llava Vision-Language Model
       Ayrıntılı Kusur Analizi
                  │
                  ▼
- PostgreSQL Denetim Geçmişi
+ PostgreSQL Denetim Geçmişi & Loglar
                  │
                  ▼
  Sonuçların Operatör Paneline Gönderilmesi
+    (Anlık Tablo Yenileme)
 ```
 
 ---
 
-#  Yapay Zekâ Boru Hattı
+# Yapay Zekâ Boru Hattı
 
-## 1. Gerçek Zamanlı Kusur Tespiti
+### Gerçek Zamanlı Kusur Tespiti
 
-YOLOv11 modeli, ONNX Runtime kullanılarak kamera görüntülerinde yüksek FPS ile çalışır ve fayans yüzeyindeki kusurları tespit ederek konum bilgisi (Bounding Box) ve güven skorunu üretir.
+YOLOv11 modeli (ONNX Runtime ile optimize edilmiş), kamera veya test görsellerinde yüksek FPS ile çalışarak kusurları konum bilgisi (Bounding Box) ve güven skoruyla tespit eder.
 
-## 2. ROI (Region of Interest) Oluşturma
+### ROI (Region of Interest) Oluşturma
 
-Tespit edilen yalnızca kusurlu bölgeler kırpılarak Vision-Language Model'e gönderilir. Böylece gereksiz hesaplama yükü azaltılır ve sistemin genel performansı artırılır.
+Yalnızca kusurlu bölgeler dinamik olarak kırpılarak Vision-Language Model'e aktarılır. Böylece gereksiz işlem yükü azaltılır.
 
-## 3. Vision-Language Analizi
+### Vision-Language Analizi
 
-Kırpılan kusur bölgesi, Ollama üzerinden çalışan **Moondream Vision-Language Model** tarafından analiz edilir ve kusurun yapısı doğal dilde ayrıntılı olarak açıklanır.
+Kırpılan kusur bölgesi, Ollama üzerinde çalışan Llava modeli tarafından analiz edilerek endüstriyel nitelikte ayrıntılı rapor oluşturulur.
 
-## 4. Sonuçların Kaydedilmesi
+### Veritabanı Senkronizasyonu
 
-Her denetim sonucunda;
-
-- Kusur türü
-- Güven skoru
-- Çıkarım süresi
-- AI tarafından üretilen analiz
-- Tarih bilgisi
-
-PostgreSQL veritabanına otomatik olarak kaydedilir.
+Elde edilen tüm veriler; kullanıcı, vardiya ve görsel yolu ilişkileriyle birlikte PostgreSQL veritabanına kaydedilir ve C# arayüzündeki **Son 15 Kayıt** tablosu anlık olarak güncellenir.
 
 ---
 
-#  Asenkron Mimari
-
-Vision-Language Model analizleri, FastAPI WebSocket döngüsünü durdurmaması için **asyncio.to_thread()** kullanılarak ayrı iş parçacığında çalıştırılır.
-
-Bu sayede sistem;
-
-- Canlı görüntü akışını kesmeden devam ettirir.
-- Operatör panelinde gecikme oluşturmaz.
-- Vision Model analizlerini arka planda gerçekleştirir.
-
----
-
-#  Proje Yapısı
+# Proje Yapısı
 
 ```text
 TileGuard_AI/
-├── docs/                      # Dokümantasyon ve mimari diyagramlar
+├── docs/
+│   └── images/
+│
 ├── src/
 │   ├── ai_engine/
-│   │   ├── agents/            # Moondream Vision Agent
-│   │   ├── api/               # FastAPI REST & WebSocket uç noktaları
-│   │   ├── models/            # ONNX modelleri
-│   │   ├── pipeline/          # YOLO çıkarım boru hattı
-│   │   ├── main.py            # FastAPI giriş noktası
+│   │   ├── agents/
+│   │   ├── api/
+│   │   ├── models/
+│   │   ├── pipeline/
+│   │   ├── main.py
 │   │   └── requirements.txt
 │   │
 │   └── operator_panel/
-│       └── TileGuard.UI/      # C# WinForms Operatör Arayüzü
+│       └── TileGuard.UI/
+│           ├── DTOs/
+│           ├── Helpers/
+│           ├── Models/
+│           ├── Resources/
+│           ├── Services/
+│           ├── Form1.cs
+│           ├── LoginForm.cs
+│           ├── HistoryForm.cs
+│           └── ...
 │
 ├── .gitignore
 └── README.md
@@ -139,57 +135,40 @@ TileGuard_AI/
 
 ---
 
-## Yol Haritası
+# Yol Haritası
 
-### Tamamlanan Özellikler
+## Tamamlanan Özellikler
 
-- [x] YOLOv11 ile gerçek zamanlı kusur tespiti
-- [x] ONNX Runtime entegrasyonu
-- [x] FastAPI backend
-- [x] WebSocket tabanlı görüntü aktarımı
-- [x] C# WinForms operatör paneli
-- [x] PostgreSQL denetim kayıt sistemi
-- [x] Moondream Vision-Language Model entegrasyonu
-- [x] Asenkron AI Pipeline
+- [x] YOLOv11 ile gerçek zamanlı kusur tespiti ve ONNX entegrasyonu
+- [x] FastAPI backend ve WebSocket tabanlı asenkron görüntü aktarımı
+- [x] C# WinForms operatör paneli ve dinamik veri gridleri
+- [x] PostgreSQL ilişkisel veritabanı yapısı (Kullanıcılar, Vardiyalar, Denetim Geçmişi, Sistem Logları)
+- [x] Llava VLM entegrasyonu ve akıllı pipeline
+- [x] Rol tabanlı kullanıcı giriş ve yönetim panelleri
 
-### Planlanan Özellikler
+## Planlanan Özellikler
 
-#### Yapay Zekâ
-
-- [ ] Daha geniş ve çeşitli veri setleri ile modelin yeniden eğitilmesi (Fine-Tuning)
-- [ ] Çıkarım (Inference) performansının optimize edilmesi
-- [ ] Kusur tespit doğruluğunun artırılması
-
-#### Operatör Paneli
-
-- [ ] Arayüz tasarımının modernleştirilmesi
-- [ ] Kullanıcı giriş ve yetkilendirme sistemi
-- [ ] Denetim geçmişi ve log görüntüleme ekranı
-- [ ] Gelişmiş filtreleme ve arama özellikleri
-- [ ] Gerçek zamanlı sistem durumu ve istatistik ekranı
-- [ ] Operatör deneyimini iyileştirecek arayüz geliştirmeleri
-
-#### Genel
-
-- [ ] Docker desteğinin eklenmesi
-- [ ] Proje dokümantasyonunun genişletilmesi
-- [ ] Daha kapsamlı test senaryolarının hazırlanması
+- [ ] Daha geniş veri setleri ile modelin fine-tune edilmesi
+- [ ] Docker ve Docker Compose desteğinin eklenmesi
+- [ ] Vardiya raporu PDF çıktı modülünün geliştirilmesi
 
 ---
 
-#  Kurulum
+# Kurulum
 
 ## Gereksinimler
 
 - Python 3.10+
 - .NET 6 veya üzeri
 - PostgreSQL 16+
-- Ollama
+- Ollama (Llava modeli için)
 
-Moondream modelini yükleyin:
+---
+
+## Llava Modelini Yükleyin
 
 ```bash
-ollama run moondream
+ollama run llava
 ```
 
 ---
@@ -209,15 +188,42 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Sunucu varsayılan olarak aşağıdaki adreste çalışacaktır.
+Sunucu varsayılan olarak:
 
-```
+```text
 http://127.0.0.1:8000
 ```
 
-## PostgreSQL Hazırlığı
+adresinde çalışacaktır.
+
+---
+
+# PostgreSQL Veritabanı Kurulumu
+
+PostgreSQL üzerinde veritabanınızı oluşturduktan sonra aşağıdaki SQL betiğini çalıştırarak tüm tabloları, ilişkileri, indeksleri ve örnek başlangıç verilerini oluşturabilirsiniz.
 
 ```sql
+-- 1. KULLANICILAR / OPERATÖRLER TABLOSU
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) DEFAULT 'Operator',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. VARDİYA TANIMLARI TABLOSU
+CREATE TABLE IF NOT EXISTS shifts (
+    shift_id SERIAL PRIMARY KEY,
+    shift_name VARCHAR(50) NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- 3. DENETİM GEÇMİŞİ TABLOSU
 CREATE TABLE IF NOT EXISTS inspection_history (
     id SERIAL PRIMARY KEY,
     timestamp VARCHAR(50),
@@ -226,38 +232,53 @@ CREATE TABLE IF NOT EXISTS inspection_history (
     confidence DOUBLE PRECISION,
     inference_time_ms DOUBLE PRECISION,
     vision_analysis TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+    shift_id INT REFERENCES shifts(shift_id) ON DELETE SET NULL,
+    image_path VARCHAR(255)
+);
+
+-- 4. PERFORMANS İÇİN İNDEKSLER
+CREATE INDEX IF NOT EXISTS idx_inspection_status ON inspection_history(status);
+CREATE INDEX IF NOT EXISTS idx_inspection_created_at ON inspection_history(created_at);
+CREATE INDEX IF NOT EXISTS idx_inspection_user_shift ON inspection_history(user_id, shift_id);
+
+-- 5. SİSTEM LOGLARI TABLOSU
+CREATE TABLE IF NOT EXISTS system_logs (
+    log_id SERIAL PRIMARY KEY,
+    log_level VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    stack_trace TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 6. ÖRNEK BAŞLANGIÇ VERİLERİ
+INSERT INTO shifts (shift_name, start_time, end_time) VALUES
+('1. Vardiya (Gündüz)', '08:00:00', '16:00:00'),
+('2. Vardiya (Akşam)', '16:00:00', '00:00:00'),
+('3. Vardiya (Gece)', '00:00:00', '08:00:00')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO users (username, password_hash, full_name, role) VALUES
+('operator_ornek', 'sifre123', 'Örnek Operatör', 'Operator'),
+('admin_ornek', 'admin123', 'Sistem Yöneticisi', 'Admin')
+ON CONFLICT DO NOTHING;
 ```
 
 ---
 
-## Operatör Paneli
+# Operatör Paneli
 
-Visual Studio ile aşağıdaki çözüm dosyasını açın.
+Visual Studio ile çözüm dosyasını açın.
 
-```
+```text
 src/operator_panel/TileGuard.UI/TileGuard.UI.sln
 ```
 
-Ardından;
-
-1. **Build Solution** işlemini gerçekleştirin.
-2. Uygulamayı çalıştırın.
-3. WebSocket adresi olarak aşağıdaki uç noktaya bağlanın.
-
-```
-ws://127.0.0.1:8000/ws/inspect
-```
+Ardından projeyi derleyin (**Build Solution**) ve çalıştırın.
 
 ---
 
-#  Ekran Görüntüleri
+# Sonuç
 
-> Operatör paneli ve örnek tespit görüntüleri proje geliştikçe eklenecektir.
-
----
-
-## Sonuç
-
-**TileGuard AI**, gerçek zamanlı nesne tespiti ile Vision-Language Model teknolojilerini tek bir sistemde birleştirerek endüstriyel fayans üretim hatlarında akıllı kalite kontrolü gerçekleştirmeyi hedefleyen ölçeklenebilir bir yapay zekâ platformudur.
+TileGuard AI; nesne tespiti ile modern Vision-Language Model teknolojilerini endüstriyel otomasyonla buluşturan, yüksek performanslı ve ölçeklenebilir bir akıllı kalite kontrol platformudur.
