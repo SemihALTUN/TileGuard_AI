@@ -24,7 +24,8 @@ ENV/
 *.pth
 *.tar.xz
 *.zip
-src/ai_engine/data/
+src/ai_engine/data/*
+!src/ai_engine/data/TILE -Instance Segmentation-.v1i.yolov11/test/images/
 
 # ==========================================
 # 4. C# / Visual Studio Derleme Kalıntıları
