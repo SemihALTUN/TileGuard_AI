@@ -45,41 +45,18 @@ Temel sistem mimarisi, yapay zekâ çıkarım boru hattı, ilişkisel veritaban�
 | **Masaüstü Arayüz** | C# WinForms (.NET), Modern UI Bileşenleri |
 | **Dağıtım (Planlanan)** | Docker, Docker Compose |
 
----
+# Sistem Şemaları ve Mimari
 
-# Sistem Mimarisi
+Projenin mimari yapısını, akış süreçlerini ve veritabanı ilişkilerini aşağıdaki şemalardan inceleyebilirsiniz:
 
-```text
-          Görüntü Kaynağı
-    (Test Görselleri / Kamera)
-                 │
-                 ▼
-      C# WinForms Operatör Paneli
-                 │
-   Base64 Görüntü Akışı (WebSocket)
-                 │
-                 ▼
-       FastAPI Backend (Python)
-                 │
-                 ▼
-      YOLOv11 (ONNX Runtime)
- Gerçek Zamanlı Kusur Tespiti
-                 │
-   ROI (Kusurlu Bölge) Kırpma
-                 │
-                 ▼
-     Llava Vision-Language Model
-      Ayrıntılı Kusur Analizi
-                 │
-                 ▼
- PostgreSQL Denetim Geçmişi & Loglar
-                 │
-                 ▼
- Sonuçların Operatör Paneline Gönderilmesi
-    (Anlık Tablo Yenileme)
-```
+### 1. Bileşen ve Dağıtım Mimarisi
+![Sistem Mimarisi](docs/diagrams/system_architecture.svg)
 
----
+### 2. Denetim ve İşlem Akışı (Sequence)
+![Süreç Akışı](docs/diagrams/inspection_sequence.svg)
+
+### 3. Veritabanı Varlık-İlişki (ER) Şeması
+![Veritabanı ER Şeması](docs/diagrams/database_er.svg)
 
 # Yapay Zekâ Boru Hattı
 
