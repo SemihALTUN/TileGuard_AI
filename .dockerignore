@@ -1,0 +1,21 @@
+# Sanal Ortamlar ve Python Önbellekleri
+.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Veri Klasörleri (Boyut şişmemesi için)
+**/data/
+
+# IDE ve Git Dosyaları
+.git
+.gitignore
+.idea/
+*.log
+
+# Dokümantasyon ve Gereksiz Markdown'lar (İsteğe bağlı ama imajı temiz tutar)
+docs/
+README.md

@@ -609,6 +609,7 @@
             button2.TabIndex = 1;
             button2.Text = "VARDİYA RAPORU AL (PDF)";
             button2.UseVisualStyleBackColor = false;
+            button2.Click += button2_Click;
             // 
             // panel7
             // 

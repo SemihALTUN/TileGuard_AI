@@ -2,23 +2,36 @@ import base64
 from io import BytesIO
 from PIL import Image
 import httpx
+import os
 
 
 class VisionLLMAgent:
-    def __init__(self, model_name: str = "llava"):
+    def __init__(self, model_name: str = "qwen2.5vl:7b"):
         self.model_name = model_name
-        self.ollama_url = "http://localhost:11434/api/generate"
+        base_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        self.ollama_url = f"{base_host}/api/generate"
 
-    def analyze_crop(self, image_crop: Image.Image) -> dict:
+    def analyze_crop(self, image_crop: Image.Image, yolo_class_name: str = "kusur") -> dict:
         try:
             buffered = BytesIO()
             image_crop.save(buffered, format="JPEG")
             img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
+            class_translation = {
+                "crack": "çatlak",
+                "oil": "yağ lekesi / sıvı kalıntısı",
+                "glue_strip": "tutkal izi / şeridi",
+                "gray_stroke": "gri leke veya çizgi hatası",
+                "rough": "yüzey pürüzlülüğü / bozukluğu",
+                "good": "temiz yüzey"
+            }
+
+            translated_class = class_translation.get(yolo_class_name, yolo_class_name)
+
             prompt = (
-                "Analyze this image of a ceramic tile defect. "
-                "Output ONLY plain ASCII English text. "
-                "Describe the defect in 3 words max. No special characters, no unicode."
+                f"Görseldeki fayans bölgesinde YOLO modeli '{translated_class}' tespiti yaptı. "
+                "Bu kusuru Türkçe olarak en fazla 6-8 kelimeyle, net ve keskin bir şekilde tanımla. "
+                "Asla cümle kurma, paragraf yazma veya açıklama uzatma. Sadece teknik tanım yap. Örnek: 'Yoğun yağ lekesi kalıntısı' veya 'Derin kenar çatlağı'."
             )
 
             payload = {
@@ -28,7 +41,7 @@ class VisionLLMAgent:
                 "stream": False,
                 "options": {
                     "temperature": 0.1,
-                    "num_predict": 50
+                    "num_predict": 80
                 }
             }
 
@@ -37,8 +50,9 @@ class VisionLLMAgent:
                 if response.status_code == 200:
                     res_text = response.json().get("response", "").strip()
 
-                    if not res_text or len(res_text) < 3:
-                        res_text = "Fayans yüzeyinde kusur tespit edildi."
+                    invalid_responses = ["", ".", ",", "!", "?", "-", "...", "evet", "hayır"]
+                    if not res_text or res_text.lower() in invalid_responses or len(res_text) < 5:
+                        res_text = f"Fayans yüzeyinde {translated_class} tespit edildi."
 
                     return {
                         "llm_response": res_text,
@@ -47,7 +61,7 @@ class VisionLLMAgent:
                     }
                 else:
                     return {
-                        "llm_response": "VisionLLM yanıt veremedi.",
+                        "llm_response": "VisionLLM yerel servisten yanıt alamadı.",
                         "is_defect": False,
                         "status": "error"
                     }

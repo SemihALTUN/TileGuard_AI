@@ -145,12 +145,12 @@ TileGuard_AI/
 - [x] PostgreSQL ilişkisel veritabanı yapısı (Kullanıcılar, Vardiyalar, Denetim Geçmişi, Sistem Logları)
 - [x] Llava VLM entegrasyonu ve akıllı pipeline
 - [x] Rol tabanlı kullanıcı giriş ve yönetim panelleri
+- [x] Docker ve Docker Compose desteğinin eklenmesi
+- [x] Vardiya raporu PDF çıktı modülünün geliştirilmesi
 
 ## Planlanan Özellikler
 
 - [ ] Daha geniş veri setleri ile modelin fine-tune edilmesi
-- [ ] Docker ve Docker Compose desteğinin eklenmesi
-- [ ] Vardiya raporu PDF çıktı modülünün geliştirilmesi
 
 ---
 

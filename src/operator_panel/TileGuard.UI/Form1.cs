@@ -555,5 +555,35 @@ namespace TileGuard.UI
             managementForm.StartPosition = FormStartPosition.CenterParent;
             managementForm.ShowDialog(this);
         }
+
+        private async void button2_Click(object sender, EventArgs e)
+        {
+            await DownloadShiftReportAsync();
+        }
+        private async Task DownloadShiftReportAsync()
+        {
+            try
+            {
+                using HttpClient client = new HttpClient();
+                string url = "http://localhost:8000/api/reports/shift-pdf";
+
+                byte[] pdfBytes = await client.GetByteArrayAsync(url);
+
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string targetDirectory = Path.Combine(baseDirectory, "docs", "shift_report");
+                Directory.CreateDirectory(targetDirectory);
+
+                string fileName = $"Vardiya_Raporu_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                string fullPath = Path.Combine(targetDirectory, fileName);
+
+                await File.WriteAllBytesAsync(fullPath, pdfBytes);
+
+                MessageBox.Show($"Vardiya raporu başarıyla kaydedildi:\n{fullPath}", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Rapor indirilirken hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

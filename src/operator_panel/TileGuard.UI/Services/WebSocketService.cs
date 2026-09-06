@@ -14,7 +14,7 @@ namespace TileGuard.UI.Services
     public class WebSocketService
     {
         private ClientWebSocket? _webSocket;
-        private readonly Uri _serverUri = new Uri("ws://127.0.0.1:8000/ws/inspect");
+        private readonly Uri _serverUri = new Uri("ws://localhost:8000/ws/inspect");
         private readonly LoggingService _logger = new LoggingService();
 
         public event Action<InspectionResultDto>? OnResultReceived;

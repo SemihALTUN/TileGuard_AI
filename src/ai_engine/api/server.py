@@ -8,6 +8,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pipeline.infer import TileLocalDetector
 from agents.vision_agent import VisionLLMAgent
+from fastapi import Response, HTTPException
+import io
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import psycopg2
+import os
 
 app = FastAPI(title="TileGuard AI - Tile Inspection Engine")
 
@@ -20,8 +26,75 @@ app.add_middleware(
 )
 
 detector = TileLocalDetector()
-vision_agent = VisionLLMAgent(model_name="moondream")
+vision_agent = VisionLLMAgent(model_name="qwen2.5vl:7b")
 
+
+@app.get("/api/reports/shift-pdf")
+def generate_shift_report_pdf():
+    try:
+        db_host = os.getenv("DB_HOST", "host.docker.internal")
+        conn = psycopg2.connect(
+            dbname="tileguard_db",
+            user="postgres",
+            password="",
+            host=db_host,
+            port="5432"
+        )
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN detected_class = 'good' THEN 1 ELSE 0 END) as good_count,
+                SUM(CASE WHEN detected_class != 'good' THEN 1 ELSE 0 END) as defect_count,
+                ROUND(AVG(inference_time_ms)::numeric, 2) as avg_inf
+            FROM inspection_history;
+        """)
+        stats = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        total_inspected = stats[0] if stats and stats[0] is not None else 0
+        good_count = stats[1] if stats and stats[1] is not None else 0
+        defect_count = stats[2] if stats and stats[2] is not None else 0
+        avg_inference = f"{stats[3]} ms" if stats and stats[3] is not None else "0 ms"
+
+    except Exception as db_err:
+        total_inspected = 0
+        good_count = 0
+        defect_count = 0
+        avg_inference = "Veri Alinamadi"
+
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, 750, "TileGuard AI - Vardiya Denetim Raporu")
+
+    p.setFont("Helvetica", 11)
+    p.drawString(50, 720, "Sistem: AI Kalite Kontrol ve Kusur Siniflandirma")
+    p.drawString(50, 700, "Durum: Cevrimici / Aktif")
+
+    p.line(50, 685, 550, 685)
+
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, 650, "Ozet Vardiya Istatistikleri:")
+
+    p.setFont("Helvetica", 11)
+    p.drawString(70, 625, f"- Toplam Denetlenen Urun: {total_inspected}")
+    p.drawString(70, 605, f"- Saglam (OK) Urun Sayisi: {good_count}")
+    p.drawString(70, 585, f"- Kusurlu (NOK) Urun Sayisi: {defect_count}")
+    p.drawString(70, 565, f"- Ortalama Cikarim Suresi: {avg_inference}")
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=vardiya_raporu.pdf"}
+    )
 
 @app.get("/")
 def read_root():
@@ -70,7 +143,9 @@ async def websocket_inspect(websocket: WebSocket):
                     if class_name != "good" and x2 > x1 and y2 > y1:
                         try:
                             cropped_defect = pil_img.crop((x1, y1, x2, y2))
-                            llm_res = vision_agent.analyze_crop(cropped_defect)
+
+                            llm_res = vision_agent.analyze_crop(cropped_defect, yolo_class_name=class_name)
+
                             vision_text = llm_res.get("llm_response", f"Yüzeyde {class_name.upper()} tespiti yapıldı.")
                         except Exception as err:
                             print(f"[WARN] VisionLLM Hatası: {err}")

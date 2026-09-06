@@ -45,3 +45,6 @@ src/ai_engine/data/*
 *.log
 .DS_Store
 Thumbs.db
+
+# Vardiya Raporları
+**/docs/shift_report/

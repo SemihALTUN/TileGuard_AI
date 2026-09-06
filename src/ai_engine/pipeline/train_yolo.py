@@ -21,7 +21,6 @@ def train_TileGuard_model():
     print("[INFO] YOLOv11s Segmentation taban modeli yükleniyor...")
     model = YOLO("yolo11s-seg.pt")
 
-    # Modellerin kaydedileceği kök dizin: src/ai_engine/models
     output_dir = (BASE_DIR / "models").resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
